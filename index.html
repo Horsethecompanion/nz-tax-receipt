@@ -79,7 +79,6 @@
     .input-group label {
       font-weight: 600;
       font-size: 0.875rem;
-      white-space: nowrap;
     }
 
     .input-group input {
@@ -93,9 +92,7 @@
       transition: border-color 0.2s;
     }
 
-    .input-group input:focus {
-      border-color: var(--welfare);
-    }
+    .input-group input:focus { border-color: var(--welfare); }
 
     button.calculate {
       padding: 0.7rem 1.5rem;
@@ -179,10 +176,6 @@
       color: var(--text-light);
     }
 
-    .salutation strong {
-      color: var(--text);
-    }
-
     .debt-banner {
       background: #f1f5f9;
       padding: 1rem 2rem;
@@ -209,15 +202,8 @@
       gap: 0.5rem;
     }
 
-    .debt-item .label {
-      font-size: 0.8rem;
-      color: var(--text-light);
-    }
-
-    .debt-item .value {
-      font-weight: 700;
-      font-size: 1rem;
-    }
+    .debt-item .label { font-size: 0.8rem; color: var(--text-light); }
+    .debt-item .value { font-weight: 700; font-size: 1rem; }
 
     .chart-section {
       padding: 1.5rem 2rem 1rem;
@@ -234,29 +220,45 @@
     .chart-container {
       display: flex;
       flex-direction: column;
-      gap: 0.55rem;
+      gap: 0.5rem;
     }
 
     .chart-row {
       display: grid;
-      grid-template-columns: 200px 1fr 90px;
+      grid-template-columns: 28px 172px 1fr 90px;
       align-items: center;
       gap: 0.75rem;
     }
+
+    .chart-caret {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      cursor: pointer;
+      width: 20px;
+      transition: transform 0.2s;
+      user-select: none;
+    }
+
+    .chart-caret.open { transform: rotate(90deg); }
 
     .chart-label {
       font-size: 0.8rem;
       color: var(--text);
       font-weight: 500;
       text-align: right;
+      cursor: pointer;
     }
+
+    .chart-label:hover { color: var(--welfare); }
 
     .chart-bar-bg {
       background: #f1f5f9;
       border-radius: 4px;
       height: 22px;
       overflow: hidden;
-      position: relative;
     }
 
     .chart-bar-fill {
@@ -269,6 +271,45 @@
       font-size: 0.8rem;
       font-weight: 700;
       color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Sub-rows (hidden by default) */
+    .sub-row {
+      display: grid;
+      grid-template-columns: 28px 172px 1fr 90px;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.2rem 0 0.2rem 28px;
+      display: none;
+    }
+
+    .sub-row.visible { display: grid; }
+
+    .sub-label {
+      font-size: 0.72rem;
+      color: var(--text-light);
+      text-align: right;
+      font-style: italic;
+    }
+
+    .sub-bar-bg {
+      background: #e8eef7;
+      border-radius: 3px;
+      height: 14px;
+      overflow: hidden;
+    }
+
+    .sub-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      opacity: 0.6;
+    }
+
+    .sub-amount {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-light);
       font-variant-numeric: tabular-nums;
     }
 
@@ -381,7 +422,8 @@
     @media (max-width: 600px) {
       .receipt-top { flex-direction: column; gap: 1rem; }
       .receipt-top .coat-of-arms { align-items: flex-start; }
-      .chart-row { grid-template-columns: 130px 1fr 75px; }
+      .chart-row { grid-template-columns: 20px 110px 1fr 65px; }
+      .sub-row { grid-template-columns: 20px 110px 1fr 65px; }
       .chart-label { font-size: 0.72rem; }
       .input-group input { width: 150px; }
       .receipt-footer { flex-direction: column; align-items: flex-start; }
@@ -414,7 +456,7 @@
         </div>
       </div>
 
-      <div class="salutation" id="salutation">
+      <div class="salutation">
         The New Zealand Government thanks you for your tax contribution for the 2024/25 financial year. This statement details where your personal income tax was spent, based on Crown expense estimates.
       </div>
 
@@ -437,11 +479,11 @@
       </div>
 
       <div class="chart-section">
-        <h2>Where Your Tax Was Spent</h2>
+        <h2>Where Your Tax Was Spent &nbsp;<span style="font-weight:400;font-size:0.7rem;color:var(--text-light)">(click any row to expand)</span></h2>
         <div class="chart-container" id="chart"></div>
       </div>
 
-      <div class="income-section" id="income-breakdown">
+      <div class="income-section">
         <h3>Your Tax Breakdown</h3>
         <div class="income-grid" id="breakdown-grid"></div>
       </div>
@@ -451,162 +493,247 @@
           <span class="total-label">Your total income tax</span>
           <span class="total-amount" id="total-tax">$0</span>
         </div>
-        <p class="note">Estimates based on 2024/25 Core Crown expense functional classification. Your actual tax may differ based on credits, KiwiSaver, student loans, and other deductions. Interest on debt figure represents NZ's share of total interest costs.</p>
+        <p class="note">Estimates based on 2024/25 Core Crown expense functional classification. Your actual tax may differ based on credits, KiwiSaver, student loans, and other deductions.</p>
       </div>
     </div>
   </div>
 
   <script>
-    // 2025/26 NZ tax brackets (since we're in April 2026, 2026 tax year is current)
+    // 2025/26 NZ tax brackets
     const TAX_BRACKETS = [
-      { min: 0,      max: 14000,  rate: 0.105 },
-      { min: 14000,  max: 48000,  rate: 0.175 },
-      { min: 48000,  max: 70000,  rate: 0.205 },
-      { min: 70000,  max: 180000, rate: 0.30  },
-      { min: 180000, max: Infinity, rate: 0.33 },
+      { min: 0,       max: 14000,  rate: 0.105 },
+      { min: 14000,   max: 48000,  rate: 0.175 },
+      { min: 48000,   max: 70000,  rate: 0.205 },
+      { min: 70000,   max: 180000, rate: 0.30  },
+      { min: 180000,  max: Infinity, rate: 0.33 },
     ];
 
     function calcPAYE(income) {
-      let tax = 0;
-      let remaining = income;
-      for (const bracket of TAX_BRACKETS) {
-        const taxable = Math.min(remaining, bracket.max - bracket.min);
-        if (taxable <= 0) break;
-        tax += taxable * bracket.rate;
-        remaining -= taxable;
+      let tax = 0, remaining = income;
+      for (const b of TAX_BRACKETS) {
+        const t = Math.min(remaining, b.max - b.min);
+        if (t <= 0) break;
+        tax += t * b.rate;
+        remaining -= t;
       }
       return tax;
     }
 
     function calcACC(income) {
-      // 2025/26 ACC levies
-      // Earner levy: 1.66% up to cap of ~$141,900
-      const EARNER_RATE   = 0.0166;
-      const EARNER_CAP    = 141900;
-      // Work account levy: 0.20% no cap
-      const WORK_RATE     = 0.0020;
-      const earnerLevy    = Math.min(income, EARNER_CAP) * EARNER_RATE;
-      const workLevy     = income * WORK_RATE;
-      return earnerLevy + workLevy;
+      return Math.min(income, 141900) * 0.0166 + income * 0.0020;
     }
 
-    function calcKS(income) {
-      // KiwiSaver: 3% employee contribution (default)
-      return income * 0.03;
-    }
+    function calcKS(income) { return income * 0.03; }
 
-    // NZ Government spending by function — 2024/25 Core Crown ($141.7b total)
-    // Each item: { label, amount_billions, color }
+    // Sub-category data keyed by spending category label
+    // Each sub: { label, amount_bn, color }
+    const SUBS = {
+      'Social Security & Welfare': [
+        { label: 'NZ Superannuation',      amount_bn: 17.6, color: '#1e40af' },
+        { label: 'Jobseeker Support',       amount_bn:  4.2, color: '#3b82f6' },
+        { label: 'Working for Families',   amount_bn:  3.1, color: '#60a5fa' },
+        { label: 'Sole Parent Support',     amount_bn:  2.1, color: '#93c5fd' },
+        { label: 'Supported Living Payment',amount_bn: 2.0, color: '#bfdbfe' },
+        { label: 'Accommodation Supplement',amount_bn: 1.8, color: '#dbeafe' },
+        { label: 'Other welfare & social', amount_bn: 16.7, color: '#eff6ff' },
+      ],
+      'Health': [
+        { label: 'Health NZ (hospitals & GPs)', amount_bn: 16.4, color: '#0f766e' },
+        { label: 'Pharmac',                     amount_bn:  3.8, color: '#14b8a6' },
+        { label: 'Mental health & addiction',   amount_bn:  2.0, color: '#2dd4bf' },
+        { label: 'Public health (prevention)',  amount_bn:  2.4, color: '#5eead4' },
+        { label: 'Disability support services',amount_bn:  3.2, color: '#99f6e4' },
+        { label: 'Other health',               amount_bn:  2.5, color: '#ccfbf1' },
+      ],
+      'Education': [
+        { label: 'Primary & secondary schools', amount_bn: 11.2, color: '#5b21b6' },
+        { label: 'Tertiary & universities',     amount_bn:  4.6, color: '#7c3aed' },
+        { label: 'Early childhood education',  amount_bn:  2.6, color: '#a78bfa' },
+        { label: 'Apprenticeship & vocational', amount_bn: 1.6, color: '#c4b5fd' },
+        { label: 'Other education',            amount_bn:  0.9, color: '#ede9fe' },
+      ],
+      'Law and Order': [
+        { label: 'Police',          amount_bn: 2.6, color: '#4338ca' },
+        { label: 'Courts & Justice',amount_bn: 1.8, color: '#6366f1' },
+        { label: 'Corrections',     amount_bn: 1.7, color: '#818cf8' },
+        { label: 'Other law & order',amount_bn: 0.6, color: '#a5b4fc' },
+      ],
+      'Transport & Communications': [
+        { label: 'State highways & roads',  amount_bn: 2.9, color: '#a855f7' },
+        { label: 'Public transport',        amount_bn: 0.8, color: '#c084fc' },
+        { label: 'Rail investment',         amount_bn: 0.9, color: '#d8b4fe' },
+        { label: 'Communications (broadband)', amount_bn: 0.9, color: '#f3e8ff' },
+      ],
+      'Economic & Industrial': [
+        { label: 'Agriculture & food',     amount_bn: 1.2, color: '#db2777' },
+        { label: 'Business development',  amount_bn: 0.9, color: '#f472b6' },
+        { label: 'Tourism',                amount_bn: 0.6, color: '#f9a8d4' },
+        { label: 'Other economic services',amount_bn: 0.8, color: '#fce7f3' },
+      ],
+      'Core Government Services': [
+        { label: 'IRD & tax collection',   amount_bn: 1.8, color: '#7c3aed' },
+        { label: 'Departments & agencies', amount_bn: 3.5, color: '#a78bfa' },
+        { label: 'Parliament & legislature',amount_bn: 0.6, color: '#c4b5fd' },
+        { label: 'Foreign affairs',         amount_bn: 0.5, color: '#ddd6fe' },
+        { label: 'Other core services',     amount_bn: 1.5, color: '#ede9fe' },
+      ],
+      'Environmental Protection': [
+        { label: 'Conservation & DOC',     amount_bn: 1.4, color: '#4d7c0f' },
+        { label: 'Climate change & ETS',    amount_bn: 0.5, color: '#84cc16' },
+        { label: 'Resource management',    amount_bn: 0.3, color: '#a3e635' },
+        { label: 'Other environmental',   amount_bn: 0.2, color: '#d9f99d' },
+      ],
+      'Housing & Community': [
+        { label: 'Social housing (Housing NZ)', amount_bn: 1.2, color: '#c2410c' },
+        { label: 'Building & consents',    amount_bn: 0.5, color: '#ea580c' },
+        { label: 'Community development', amount_bn: 0.3, color: '#f97316' },
+        { label: 'Other housing & community', amount_bn: 0.2, color: '#fdba74' },
+      ],
+    };
+
+    // All main spending categories
     const SPENDING = [
-      { label: 'Social Security & Welfare', amount: 47.5,  color: '#2563eb' },
-      { label: 'Health',                    amount: 30.3,  color: '#0d9488' },
-      { label: 'Education',                 amount: 20.9,  color: '#7c3aed' },
-      { label: 'Finance Costs (Interest)',  amount: 8.9,   color: '#9ca3af' },
-      { label: 'Core Government Services',  amount: 7.9,   color: '#a78bfa' },
-      { label: 'Law and Order',             amount: 6.7,   color: '#6366f1' },
-      { label: 'Transport & Communications',amount: 5.5,   color: '#c084fc' },
-      { label: 'Economic & Industrial',     amount: 3.5,  color: '#f472b6' },
-      { label: 'Defence',                   amount: 3.3,   color: '#06b6d4' },
-      { label: 'Environmental Protection',  amount: 2.4,  color: '#84cc16' },
-      { label: 'Housing & Community',       amount: 2.2,  color: '#f97316' },
-      { label: 'Heritage, Culture & Rec.',  amount: 1.5,   color: '#eab308' },
-      { label: 'Primary Services',          amount: 1.0,   color: '#22c55e' },
-      { label: 'Other',                     amount: 0.1,   color: '#94a3b8' },
+      { label: 'Social Security & Welfare',  amount: 47.5, color: '#2563eb' },
+      { label: 'Health',                     amount: 30.3, color: '#0d9488' },
+      { label: 'Education',                  amount: 20.9, color: '#7c3aed' },
+      { label: 'Finance Costs (Interest)',   amount:  8.9, color: '#9ca3af' },
+      { label: 'Core Government Services',   amount:  7.9, color: '#a78bfa' },
+      { label: 'Law and Order',              amount:  6.7, color: '#6366f1' },
+      { label: 'Transport & Communications',amount: 5.5, color: '#c084fc' },
+      { label: 'Economic & Industrial',     amount:  3.5, color: '#f472b6' },
+      { label: 'Defence',                    amount:  3.3, color: '#06b6d4' },
+      { label: 'Environmental Protection',   amount:  2.4, color: '#84cc16' },
+      { label: 'Housing & Community',        amount:  2.2, color: '#f97316' },
+      { label: 'Heritage, Culture & Rec.',   amount:  1.5, color: '#eab308' },
+      { label: 'Primary Services',           amount:  1.0, color: '#22c55e' },
+      { label: 'Other',                      amount:  0.1, color: '#94a3b8' },
     ];
 
     const TOTAL_SPEND = 141.7; // billion
+    const TOTAL_TAX  = 61.8;  // billion PAYE revenue
 
-    function formatCurrency(n) {
-      if (n >= 1000000000) {
-        return '$' + (n / 1000000000).toFixed(2) + 'B';
-      }
-      if (n >= 1000000) {
-        return '$' + (n / 1000000).toFixed(2) + 'M';
-      }
-      if (n >= 1000) {
-        return '$' + n.toLocaleString('en-NZ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-      }
-      return '$' + n.toFixed(2);
-    }
-
-    function formatCurrencyFull(n) {
+    function fmt(n) {
       return '$' + n.toLocaleString('en-NZ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
-    function calculate() {
-      const incomeEl = document.getElementById('income');
-      const income = parseFloat(incomeEl.value);
+    let gIncome  = 0;
+    let gPaye    = 0;
+    let gRatio   = 0;
 
+    function toggleRow(label) {
+      const el = document.getElementById('sub-' + label.replace(/[^a-z]/g, '_'));
+      const caret = document.getElementById('caret-' + label.replace(/[^a-z]/g, '_'));
+      if (!el) return;
+      const isOpen = el.classList.toggle('visible');
+      if (caret) caret.classList.toggle('open', isOpen);
+    }
+
+    function calculate() {
+      const income = parseFloat(document.getElementById('income').value);
       if (isNaN(income) || income <= 0) {
         alert('Please enter a valid pre-tax income.');
         return;
       }
 
-      const paye       = calcPAYE(income);
-      const acc        = calcACC(income);
-      const kiwiSaver  = calcKS(income);
-      const totalTax  = paye; // Main income tax
+      gIncome = income;
+      gPaye   = calcPAYE(income);
+      gRatio  = gPaye / (TOTAL_TAX * 1e9);
 
-      // Scale spending proportions to this person's tax paid
-      const taxRatio   = totalTax / (61.8 * 1e9); // 61.8b is total PAYE
-      const totalSpend = TOTAL_SPEND * 1e9;       // 141.7 billion
+      document.getElementById('receipt').classList.add('visible');
+      document.getElementById('total-tax').textContent = fmt(Math.round(gPaye));
 
-      const receipt = document.getElementById('receipt');
-      receipt.classList.add('visible');
+      buildChart();
+      buildBreakdown();
 
-      // Build chart
-      const chartEl = document.getElementById('chart');
-      const maxAmount = Math.max(...SPENDING.map(s => s.amount));
+      document.getElementById('receipt').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
-      let chartHTML = '';
-      for (const item of SPENDING) {
-        const myShare  = item.amount * 1e9 * taxRatio;
-        const pct      = (item.amount / TOTAL_SPEND) * 100;
-        const barWidth = (item.amount / maxAmount) * 100;
-        chartHTML += `
+    function buildChart() {
+      const maxAmt = Math.max(...SPENDING.map(s => s.amount));
+      let html = '';
+
+      for (const s of SPENDING) {
+        const myShare  = s.amount * 1e9 * gRatio;
+        const barW     = (s.amount / maxAmt) * 100;
+        const idStr    = s.label.replace(/[^a-z]/g, '_');
+        const hasSub   = SUBS[s.label];
+        const subTotal = hasSub ? hasSub.reduce((a, x) => a + x.amount_bn, 0) : 0;
+
+        html += `
           <div class="chart-row">
-            <div class="chart-label">${item.label}</div>
+            <div class="chart-caret ${hasSub ? '' : 'invisible'}" id="caret-${idStr}"
+                 onclick="${hasSub ? `toggleRow('${s.label}')` : ''}"
+                 style="cursor:${hasSub ? 'pointer' : 'default'}">${hasSub ? '&#9658;' : ''}</div>
+            <div class="chart-label" onclick="${hasSub ? `toggleRow('${s.label}')` : ''}">${s.label}</div>
             <div class="chart-bar-bg">
-              <div class="chart-bar-fill" style="width:${barWidth}%;background:${item.color}"></div>
+              <div class="chart-bar-fill" style="width:${barW}%;background:${s.color}"></div>
             </div>
-            <div class="chart-amount">${formatCurrency(myShare)}</div>
+            <div class="chart-amount">${fmt(Math.round(myShare))}</div>
           </div>`;
-      }
-      chartEl.innerHTML = chartHTML;
 
-      // Build breakdown
-      const breakdownGrid = document.getElementById('breakdown-grid');
-      breakdownGrid.innerHTML = `
+        // Sub-rows
+        if (hasSub) {
+          const subMax = Math.max(...hasSub.map(x => x.amount_bn));
+          html += `<div class="sub-row" id="sub-${idStr}">`;
+          for (const sub of hasSub) {
+            const subAmt = sub.amount_bn * 1e9 * gRatio;
+            const subBarW = (sub.amount_bn / subMax) * 100;
+            // Scale sub bars so they fit proportionally within parent
+            const scaledW = (sub.amount_bn / subTotal) * barW;
+            html += `
+              <div></div>
+              <div class="sub-label">${sub.label}</div>
+              <div class="sub-bar-bg">
+                <div class="sub-bar-fill" style="width:${subBarW}%;background:${sub.color}"></div>
+              </div>
+              <div class="sub-amount">${fmt(Math.round(subAmt))}</div>`;
+          }
+          html += `</div>`;
+        }
+      }
+
+      document.getElementById('chart').innerHTML = html;
+    }
+
+    function buildBreakdown() {
+      const acc    = calcACC(gIncome);
+      const ks     = calcKS(gIncome);
+      const totalD = gPaye + acc + ks;
+      const net   = gIncome - totalD;
+
+      document.getElementById('breakdown-grid').innerHTML = `
         <div class="income-item highlight">
           <span class="label">Pre-tax income</span>
-          <span class="value">${formatCurrencyFull(Math.round(income))}</span>
+          <span class="value">${fmt(Math.round(gIncome))}</span>
         </div>
         <div class="income-item tax-type">
           <span class="label">Income tax (PAYE)</span>
-          <span class="value">${formatCurrencyFull(Math.round(paye))}</span>
+          <span class="value">${fmt(Math.round(gPaye))}</span>
         </div>
         <div class="income-item tax-type">
-          <span class="label">ACC levies (1.86%)</span>
-          <span class="value">${formatCurrencyFull(Math.round(acc))}</span>
+          <span class="label">ACC levies (~1.86%)</span>
+          <span class="value">${fmt(Math.round(acc))}</span>
         </div>
         <div class="income-item tax-type">
           <span class="label">KiwiSaver (3%)</span>
-          <span class="value">${formatCurrencyFull(Math.round(kiwiSaver))}</span>
+          <span class="value">${fmt(Math.round(ks))}</span>
+        </div>
+        <div class="income-item tax-type">
+          <span class="label">Other deductions</span>
+          <span class="value">${fmt(0)}</span>
         </div>
         <hr class="section-divider">
         <div class="income-item total-type">
-          <span class="label">Total income tax</span>
-          <span class="value">${formatCurrencyFull(Math.round(totalTax))}</span>
+          <span class="label">Total deductions</span>
+          <span class="value">${fmt(Math.round(totalD))}</span>
+        </div>
+        <div class="income-item highlight">
+          <span class="label">Take-home pay</span>
+          <span class="value">${fmt(Math.round(net))}</span>
         </div>
       `;
-
-      document.getElementById('total-tax').textContent = formatCurrencyFull(Math.round(totalTax));
-
-      // Scroll to receipt
-      receipt.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Allow Enter key
     document.getElementById('income').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') calculate();
     });
