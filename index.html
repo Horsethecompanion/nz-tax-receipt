@@ -125,8 +125,8 @@
       color: white;
       padding: 1.5rem 2rem;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .receipt-top .titles h1 {
@@ -141,33 +141,8 @@
       margin-top: 0.25rem;
     }
 
-    .receipt-top .coat-of-arms {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.25rem;
-    }
 
-    .coat-of-arms .nz-crest {
-      width: 52px;
-      height: 52px;
-      background: white;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: #0f172a;
-      text-align: center;
-      line-height: 1.1;
-      padding: 4px;
-    }
 
-    .coat-of-arms span {
-      font-size: 0.7rem;
-      color: #94a3b8;
-    }
 
     .salutation {
       padding: 1.25rem 2rem;
@@ -421,13 +396,6 @@
 
     @media (max-width: 600px) {
       .receipt-top { flex-direction: column; gap: 1rem; }
-      .receipt-top .coat-of-arms { align-items: flex-start; }
-      .chart-row { grid-template-columns: 20px 110px 1fr 65px; }
-      .sub-row { grid-template-columns: 20px 110px 1fr 65px; }
-      .chart-label { font-size: 0.72rem; }
-      .input-group input { width: 150px; }
-      .receipt-footer { flex-direction: column; align-items: flex-start; }
-    }
   </style>
 </head>
 <body>
@@ -449,10 +417,6 @@
         <div class="titles">
           <h1>TAX RECEIPT</h1>
           <p>New Zealand Government · 2024/25 Financial Year</p>
-        </div>
-        <div class="coat-of-arms">
-          <div class="nz-crest">🇳🇿<br>New Zealand<br>Government</div>
-          <span>taxreciept.govt.nz</span>
         </div>
       </div>
 
