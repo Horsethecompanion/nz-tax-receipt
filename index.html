@@ -454,10 +454,10 @@
 
       <div class="receipt-footer">
         <div class="total-box">
-          <span class="total-label">Your total income tax</span>
+          <span class="total-label">Your income tax (PAYE)</span>
           <span class="total-amount" id="total-tax">$0</span>
         </div>
-        <p class="note">Estimates based on 2024/25 Core Crown expense functional classification. Your actual tax may differ based on credits, KiwiSaver, student loans, and other deductions.</p>
+        <p class="note">Estimates based on 2024/25 Core Crown expense functional classification. ACC levies and KiwiSaver are shown separately as they are not taxes — ACC is insurance and KiwiSaver is a savings scheme. Your actual tax may differ based on credits, student loans, and other deductions.</p>
       </div>
     </div>
   </div>
@@ -678,22 +678,18 @@
           <span class="label">Income tax (PAYE)</span>
           <span class="value">${fmt(Math.round(gPaye))}</span>
         </div>
-        <div class="income-item tax-type">
+        <div class="income-item">
           <span class="label">ACC levies (~1.86%)</span>
           <span class="value">${fmt(Math.round(acc))}</span>
         </div>
-        <div class="income-item tax-type">
+        <div class="income-item">
           <span class="label">KiwiSaver (3%)</span>
           <span class="value">${fmt(Math.round(ks))}</span>
         </div>
-        <div class="income-item tax-type">
-          <span class="label">Other deductions</span>
-          <span class="value">${fmt(0)}</span>
-        </div>
         <hr class="section-divider">
         <div class="income-item total-type">
-          <span class="label">Total deductions</span>
-          <span class="value">${fmt(Math.round(totalD))}</span>
+          <span class="label">Total to government (tax)</span>
+          <span class="value">${fmt(Math.round(gPaye))}</span>
         </div>
         <div class="income-item highlight">
           <span class="label">Take-home pay</span>
