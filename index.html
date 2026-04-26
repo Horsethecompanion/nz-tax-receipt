@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NZ Tax Receipt</title>
+  <style>
+    :root {
+      --welfare: #2563eb;
+      --health: #0d9488;
+      --education: #7c3aed;
+      --finance: #9ca3af;
+      --coreGov: #a78bfa;
+      --law: #6366f1;
+      --transport: #c084fc;
+      --econ: #f472b6;
+      --defence: #06b6d4;
+      --env: #84cc16;
+      --housing: #f97316;
+      --heritage: #eab308;
+      --primary: #22c55e;
+      --other: #94a3b8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .input-section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .input-section h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .input-section p {
+      color: var(--text-light);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .input-group label {
+      font-weight: 600;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+
+    .input-group input {
+      padding: 0.6rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      width: 200px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--welfare);
+    }
+
+    button.calculate {
+      padding: 0.7rem 1.5rem;
+      background: var(--welfare);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button.calculate:hover { background: #1d4ed8; }
+    button.calculate:active { transform: scale(0.98); }
+
+    .receipt {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: none;
+    }
+
+    .receipt.visible { display: block; }
+
+    .receipt-top {
+      background: #0f172a;
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .receipt-top .titles h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .receipt-top .titles p {
+      color: #94a3b8;
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+
+    .receipt-top .coat-of-arms {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+    }
+
+    .coat-of-arms .nz-crest {
+      width: 52px;
+      height: 52px;
+      background: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      text-align: center;
+      line-height: 1.1;
+      padding: 4px;
+    }
+
+    .coat-of-arms span {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    .salutation {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+
+    .salutation strong {
+      color: var(--text);
+    }
+
+    .debt-banner {
+      background: #f1f5f9;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .debt-banner h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .debt-row {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .debt-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .debt-item .label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .debt-item .value {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .chart-section {
+      padding: 1.5rem 2rem 1rem;
+    }
+
+    .chart-section h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 90px;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .chart-label {
+      font-size: 0.8rem;
+      color: var(--text);
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .chart-bar-bg {
+      background: #f1f5f9;
+      border-radius: 4px;
+      height: 22px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chart-amount {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .receipt-footer {
+      padding: 1.25rem 2rem;
+      border-top: 3px solid #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .total-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .total-box .total-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-light);
+    }
+
+    .total-box .total-amount {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .note {
+      font-size: 0.7rem;
+      color: var(--text-light);
+      max-width: 500px;
+      line-height: 1.4;
+    }
+
+    .income-section {
+      padding: 1.25rem 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .income-section h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+    }
+
+    .income-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .income-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.85rem;
+    }
+
+    .income-item .label { color: var(--text-light); }
+    .income-item .value { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .income-item.highlight {
+      background: #f0fdf4;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border-bottom: none;
+      margin-bottom: 0.25rem;
+    }
+
+    .income-item.highlight .label { color: #166534; font-weight: 600; }
+    .income-item.highlight .value { color: #166534; }
+
+    .income-item.tax-type {
+      background: #fef2f2;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border-bottom: none;
+    }
+
+    .income-item.tax-type .label { color: #991b1b; font-weight: 600; }
+    .income-item.tax-type .value { color: #991b1b; }
+
+    .income-item.total-type {
+      background: #0f172a;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      border-bottom: none;
+    }
+
+    .income-item.total-type .label { color: #e2e8f0; font-weight: 700; }
+    .income-item.total-type .value { color: white; font-weight: 800; font-size: 1rem; }
+
+    .income-grid .spacer { height: 0.5rem; }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0.5rem 0;
+    }
+
+    @media (max-width: 600px) {
+      .receipt-top { flex-direction: column; gap: 1rem; }
+      .receipt-top .coat-of-arms { align-items: flex-start; }
+      .chart-row { grid-template-columns: 130px 1fr 75px; }
+      .chart-label { font-size: 0.72rem; }
+      .input-group input { width: 150px; }
+      .receipt-footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="input-section">
+      <h1>🧾 NZ Tax Receipt Calculator</h1>
+      <p>Enter your annual pre-tax income to see where your tax dollars go, based on 2024/25 Crown accounts.</p>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="income">Pre-tax income</label>
+          <input type="number" id="income" placeholder="e.g. 85000" min="0" max="10000000">
+        </div>
+        <button class="calculate" onclick="calculate()">Generate Receipt</button>
+      </div>
+    </div>
+
+    <div class="receipt" id="receipt">
+      <div class="receipt-top">
+        <div class="titles">
+          <h1>TAX RECEIPT</h1>
+          <p>New Zealand Government · 2024/25 Financial Year</p>
+        </div>
+        <div class="coat-of-arms">
+          <div class="nz-crest">🇳🇿<br>New Zealand<br>Government</div>
+          <span>taxreciept.govt.nz</span>
+        </div>
+      </div>
+
+      <div class="salutation" id="salutation">
+        The New Zealand Government thanks you for your tax contribution for the 2024/25 financial year. This statement details where your personal income tax was spent, based on Crown expense estimates.
+      </div>
+
+      <div class="debt-banner">
+        <h3>New Zealand Government Gross Debt</h3>
+        <div class="debt-row">
+          <div class="debt-item">
+            <span class="label">Gross debt (2024/25):</span>
+            <span class="value">$199 billion</span>
+          </div>
+          <div class="debt-item">
+            <span class="label">Net core Crown debt:</span>
+            <span class="value">$182.2 billion</span>
+          </div>
+          <div class="debt-item">
+            <span class="label">Interest this year:</span>
+            <span class="value">$8.9 billion</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <h2>Where Your Tax Was Spent</h2>
+        <div class="chart-container" id="chart"></div>
+      </div>
+
+      <div class="income-section" id="income-breakdown">
+        <h3>Your Tax Breakdown</h3>
+        <div class="income-grid" id="breakdown-grid"></div>
+      </div>
+
+      <div class="receipt-footer">
+        <div class="total-box">
+          <span class="total-label">Your total income tax</span>
+          <span class="total-amount" id="total-tax">$0</span>
+        </div>
+        <p class="note">Estimates based on 2024/25 Core Crown expense functional classification. Your actual tax may differ based on credits, KiwiSaver, student loans, and other deductions. Interest on debt figure represents NZ's share of total interest costs.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 2025/26 NZ tax brackets (since we're in April 2026, 2026 tax year is current)
+    const TAX_BRACKETS = [
+      { min: 0,      max: 14000,  rate: 0.105 },
+      { min: 14000,  max: 48000,  rate: 0.175 },
+      { min: 48000,  max: 70000,  rate: 0.205 },
+      { min: 70000,  max: 180000, rate: 0.30  },
+      { min: 180000, max: Infinity, rate: 0.33 },
+    ];
+
+    function calcPAYE(income) {
+      let tax = 0;
+      let remaining = income;
+      for (const bracket of TAX_BRACKETS) {
+        const taxable = Math.min(remaining, bracket.max - bracket.min);
+        if (taxable <= 0) break;
+        tax += taxable * bracket.rate;
+        remaining -= taxable;
+      }
+      return tax;
+    }
+
+    function calcACC(income) {
+      // 2025/26 ACC levies
+      // Earner levy: 1.66% up to cap of ~$141,900
+      const EARNER_RATE   = 0.0166;
+      const EARNER_CAP    = 141900;
+      // Work account levy: 0.20% no cap
+      const WORK_RATE     = 0.0020;
+      const earnerLevy    = Math.min(income, EARNER_CAP) * EARNER_RATE;
+      const workLevy     = income * WORK_RATE;
+      return earnerLevy + workLevy;
+    }
+
+    function calcKS(income) {
+      // KiwiSaver: 3% employee contribution (default)
+      return income * 0.03;
+    }
+
+    // NZ Government spending by function — 2024/25 Core Crown ($141.7b total)
+    // Each item: { label, amount_billions, color }
+    const SPENDING = [
+      { label: 'Social Security & Welfare', amount: 47.5,  color: '#2563eb' },
+      { label: 'Health',                    amount: 30.3,  color: '#0d9488' },
+      { label: 'Education',                 amount: 20.9,  color: '#7c3aed' },
+      { label: 'Finance Costs (Interest)',  amount: 8.9,   color: '#9ca3af' },
+      { label: 'Core Government Services',  amount: 7.9,   color: '#a78bfa' },
+      { label: 'Law and Order',             amount: 6.7,   color: '#6366f1' },
+      { label: 'Transport & Communications',amount: 5.5,   color: '#c084fc' },
+      { label: 'Economic & Industrial',     amount: 3.5,  color: '#f472b6' },
+      { label: 'Defence',                   amount: 3.3,   color: '#06b6d4' },
+      { label: 'Environmental Protection',  amount: 2.4,  color: '#84cc16' },
+      { label: 'Housing & Community',       amount: 2.2,  color: '#f97316' },
+      { label: 'Heritage, Culture & Rec.',  amount: 1.5,   color: '#eab308' },
+      { label: 'Primary Services',          amount: 1.0,   color: '#22c55e' },
+      { label: 'Other',                     amount: 0.1,   color: '#94a3b8' },
+    ];
+
+    const TOTAL_SPEND = 141.7; // billion
+
+    function formatCurrency(n) {
+      if (n >= 1000000000) {
+        return '$' + (n / 1000000000).toFixed(2) + 'B';
+      }
+      if (n >= 1000000) {
+        return '$' + (n / 1000000).toFixed(2) + 'M';
+      }
+      if (n >= 1000) {
+        return '$' + n.toLocaleString('en-NZ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      }
+      return '$' + n.toFixed(2);
+    }
+
+    function formatCurrencyFull(n) {
+      return '$' + n.toLocaleString('en-NZ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function calculate() {
+      const incomeEl = document.getElementById('income');
+      const income = parseFloat(incomeEl.value);
+
+      if (isNaN(income) || income <= 0) {
+        alert('Please enter a valid pre-tax income.');
+        return;
+      }
+
+      const paye       = calcPAYE(income);
+      const acc        = calcACC(income);
+      const kiwiSaver  = calcKS(income);
+      const totalTax  = paye; // Main income tax
+
+      // Scale spending proportions to this person's tax paid
+      const taxRatio   = totalTax / (61.8 * 1e9); // 61.8b is total PAYE
+      const totalSpend = TOTAL_SPEND * 1e9;       // 141.7 billion
+
+      const receipt = document.getElementById('receipt');
+      receipt.classList.add('visible');
+
+      // Build chart
+      const chartEl = document.getElementById('chart');
+      const maxAmount = Math.max(...SPENDING.map(s => s.amount));
+
+      let chartHTML = '';
+      for (const item of SPENDING) {
+        const myShare  = item.amount * 1e9 * taxRatio;
+        const pct      = (item.amount / TOTAL_SPEND) * 100;
+        const barWidth = (item.amount / maxAmount) * 100;
+        chartHTML += `
+          <div class="chart-row">
+            <div class="chart-label">${item.label}</div>
+            <div class="chart-bar-bg">
+              <div class="chart-bar-fill" style="width:${barWidth}%;background:${item.color}"></div>
+            </div>
+            <div class="chart-amount">${formatCurrency(myShare)}</div>
+          </div>`;
+      }
+      chartEl.innerHTML = chartHTML;
+
+      // Build breakdown
+      const breakdownGrid = document.getElementById('breakdown-grid');
+      breakdownGrid.innerHTML = `
+        <div class="income-item highlight">
+          <span class="label">Pre-tax income</span>
+          <span class="value">${formatCurrencyFull(Math.round(income))}</span>
+        </div>
+        <div class="income-item tax-type">
+          <span class="label">Income tax (PAYE)</span>
+          <span class="value">${formatCurrencyFull(Math.round(paye))}</span>
+        </div>
+        <div class="income-item tax-type">
+          <span class="label">ACC levies (1.86%)</span>
+          <span class="value">${formatCurrencyFull(Math.round(acc))}</span>
+        </div>
+        <div class="income-item tax-type">
+          <span class="label">KiwiSaver (3%)</span>
+          <span class="value">${formatCurrencyFull(Math.round(kiwiSaver))}</span>
+        </div>
+        <hr class="section-divider">
+        <div class="income-item total-type">
+          <span class="label">Total income tax</span>
+          <span class="value">${formatCurrencyFull(Math.round(totalTax))}</span>
+        </div>
+      `;
+
+      document.getElementById('total-tax').textContent = formatCurrencyFull(Math.round(totalTax));
+
+      // Scroll to receipt
+      receipt.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Allow Enter key
+    document.getElementById('income').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') calculate();
+    });
+  </script>
+</body>
+</html>
