@@ -573,8 +573,11 @@
       { label: 'Other',                      amount:  0.1, color: '#94a3b8' },
     ];
 
-    const TOTAL_SPEND = 141.7; // billion
-    const TOTAL_TAX  = 61.8;  // billion PAYE revenue
+    // Total Crown revenue for 2024/25: $169.8B (tax + non-tax)
+    // Tax revenue specifically: $121.1B
+    // We use tax revenue as the base so the spent amounts sum to the tax actually paid
+    const TOTAL_GOVT_REVENUE  = 169.8;  // billion — all revenue collected
+    const TOTAL_TAX_REVENUE  = 121.1;  // billion — tax revenue only
 
     function fmt(n) {
       return '$' + n.toLocaleString('en-NZ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -601,7 +604,8 @@
 
       gIncome = income;
       gPaye   = calcPAYE(income);
-      gRatio  = gPaye / (TOTAL_TAX * 1e9);
+      // Scale spending proportionally to this person's PAYE vs total tax revenue
+      gRatio  = gPaye / (TOTAL_TAX_REVENUE * 1e9);
 
       document.getElementById('receipt').classList.add('visible');
       document.getElementById('total-tax').textContent = fmt(Math.round(gPaye));
