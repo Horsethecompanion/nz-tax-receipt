@@ -685,6 +685,8 @@
     let gIncome  = 0;
     let gPaye    = 0;
     let gRatio   = 0;
+    let gKsRate  = 0.03;
+    let gOtherRate = 0;
 
     function toggleRow(label) {
       const el = document.getElementById('sub-' + label.replace(/[^a-z]/g, '_'));
@@ -707,6 +709,8 @@
       const otherDeductions = income * (otherRate / 100);
       const taxableIncome = income - otherDeductions;
       gIncome = income;
+      gKsRate  = ksRate;
+      gOtherRate = otherRate;
       gPaye   = calcPAYE(taxableIncome);
       // Scale spending proportionally to this person's PAYE vs total tax revenue
       gRatio  = gPaye / (TOTAL_TAX_REVENUE * 1e9);
@@ -769,7 +773,7 @@
 
     function buildBreakdown() {
       const acc    = calcACC(gIncome);
-      const ks     = gIncome * (ksRate / 100);
+      const ks     = gIncome * (gKsRate / 100);
       const totalD = gPaye + acc + ks;
       const net   = gIncome - totalD;
 
@@ -787,7 +791,7 @@
           <span class="value">${fmt(Math.round(acc))}</span>
         </div>
         <div class="income-item">
-          <span class="label">KiwiSaver (${ksRate.toFixed(1)}%)</span>
+          <span class="label">KiwiSaver (${gKsRate.toFixed(1)}%)</span>
           <span class="value">${fmt(Math.round(ks))}</span>
         </div>
         <hr class="section-divider">
