@@ -325,6 +325,22 @@
       line-height: 1.4;
     }
 
+    details.sources {
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
+      color: var(--text-light);
+    }
+    details.sources summary {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0.25rem 0;
+    }
+    details.sources ul {
+      margin: 0.5rem 0 0 1.25rem;
+      line-height: 1.5;
+    }
+    details.sources li { margin-bottom: 0.25rem; }
+
     .income-section {
       padding: 1.25rem 2rem;
       border-top: 1px solid var(--border);
@@ -476,7 +492,7 @@
   <div class="container">
     <div class="input-section">
       <h1>🧾 NZ Tax Receipt Calculator</h1>
-      <p>Enter your annual pre-tax income to see where your tax dollars go, based on 2024/25 Crown accounts.</p>
+      <p>Enter your annual pre-tax income to see where your tax dollars go, based on 2025/26 BEFU (Budget Economic and Fiscal Update) forecasts — see Data Sources below.</p>
       <div class="input-row">
         <div class="input-group">
           <label for="income">Pre-tax income</label>
@@ -508,28 +524,28 @@
       <div class="receipt-top">
         <div class="titles">
           <h1>TAX RECEIPT</h1>
-          <p>New Zealand Government · 2024/25 Financial Year</p>
+          <p>New Zealand Government · 2025/26 Financial Year (BEFU forecast)</p>
         </div>
       </div>
 
       <div class="salutation">
-        The New Zealand Government thanks you for your tax contribution for the 2024/25 financial year. This statement details where your personal income tax was spent, based on Crown expense estimates.
+        The New Zealand Government thanks you for your tax contribution for the 2025/26 financial year. This statement details where your personal income tax was spent, based on the Core Crown expense functional classification forecast published in the Financial Statements of the Government (11 months to 31 May 2026).
       </div>
 
       <div class="debt-banner">
-        <h3>New Zealand Government Gross Debt</h3>
+        <h3>New Zealand Government Debt (FY 2025/26 forecast)</h3>
         <div class="debt-row">
           <div class="debt-item">
-            <span class="label">Gross debt (2024/25):</span>
-            <span class="value">$199 billion</span>
+            <span class="label">Gross debt:</span>
+            <span class="value">$223.8 billion</span>
           </div>
           <div class="debt-item">
             <span class="label">Net core Crown debt:</span>
-            <span class="value">$182.2 billion</span>
+            <span class="value">$191.8 billion</span>
           </div>
           <div class="debt-item">
-            <span class="label">Interest this year:</span>
-            <span class="value">$8.9 billion</span>
+            <span class="label">Finance costs (interest):</span>
+            <span class="value">$9.1 billion</span>
           </div>
         </div>
       </div>
@@ -549,7 +565,15 @@
           <span class="total-label">Your income tax (PAYE)</span>
           <span class="total-amount" id="total-tax">$0</span>
         </div>
-        <p class="note">Estimates based on 2024/25 Core Crown expense functional classification. ACC levies and KiwiSaver are shown separately as they are not taxes — ACC is insurance and KiwiSaver is a savings scheme. Your actual tax may differ based on credits, student loans, and other deductions.</p>
+        <p class="note">Top-level figures from the 2025/26 BEFU (Budget Economic and Fiscal Update) forecast — Core Crown expense functional classification. Sub-category breakdown shown when expanded is from the 2024/25 Estimates and has not been re-allocated across the 2025/26 forecast; treat sub-totals as approximate. ACC levies and KiwiSaver are shown separately as they are not taxes — ACC is insurance and KiwiSaver is a savings scheme. Your actual tax may differ based on credits, student loans, and other deductions.</p>
+        <details class="sources">
+          <summary>Data sources</summary>
+          <ul>
+            <li><strong>Top-level spending &amp; debt</strong>: The Treasury — <em>Financial Statements of the Government of New Zealand, 11 months to 31 May 2026</em> (fsgnz-11mths-may26.xlsx), specifically the <em>FI Fun Class</em> sheet (Core Crown expenses) and <em>FI tables for FSG</em> sheet (Core Crown tax revenue, gross/net debt, finance costs).</li>
+            <li><strong>Tax brackets</strong>: 2025/26 NZ income tax rates (IRD).</li>
+            <li><strong>Sub-category breakdown</strong>: 2024/25 Estimates of Appropriations — not refreshed for 2025/26. Treat as illustrative only.</li>
+          </ul>
+        </details>
       </div>
     </div>
   </div>
@@ -647,29 +671,31 @@
       ],
     };
 
-    // All main spending categories
+    // All main spending categories (Core Crown, $ billions)
+    // Source: Financial Statements of the Government, 11 months to 31 May 2026
+    //   FI Fun Class sheet, rows 41-56 (Core Crown expenses) — Annual Forecast column
+    //   Converted from $m to $B by dividing by 1000 and rounding to 1 dp
     const SPENDING = [
-      { label: 'Social Security & Welfare',  amount: 47.5, color: '#2563eb' },
-      { label: 'Health',                     amount: 30.3, color: '#0d9488' },
-      { label: 'Education',                  amount: 20.9, color: '#7c3aed' },
-      { label: 'Finance Costs (Interest)',   amount:  8.9, color: '#9ca3af' },
-      { label: 'Core Government Services',   amount:  7.9, color: '#a78bfa' },
-      { label: 'Law and Order',              amount:  6.7, color: '#6366f1' },
-      { label: 'Transport & Communications',amount: 5.5, color: '#c084fc' },
+      { label: 'Social Security & Welfare',  amount: 50.5, color: '#2563eb' },
+      { label: 'Health',                     amount: 33.2, color: '#0d9488' },
+      { label: 'Education',                  amount: 21.5, color: '#7c3aed' },
+      { label: 'Finance Costs (Interest)',   amount:  9.1, color: '#9ca3af' },
+      { label: 'Law and Order',              amount:  7.3, color: '#6366f1' },
+      { label: 'Core Government Services',   amount:  6.6, color: '#a78bfa' },
+      { label: 'Transport & Communications', amount:  6.1, color: '#c084fc' },
+      { label: 'Defence',                    amount:  3.6, color: '#06b6d4' },
       { label: 'Economic & Industrial',     amount:  3.5, color: '#f472b6' },
-      { label: 'Defence',                    amount:  3.3, color: '#06b6d4' },
       { label: 'Environmental Protection',   amount:  2.4, color: '#84cc16' },
       { label: 'Housing & Community',        amount:  2.2, color: '#f97316' },
-      { label: 'Heritage, Culture & Rec.',   amount:  1.5, color: '#eab308' },
-      { label: 'Primary Services',           amount:  1.0, color: '#22c55e' },
-      { label: 'Other',                      amount:  0.1, color: '#94a3b8' },
+      { label: 'Heritage, Culture & Rec.',   amount:  1.4, color: '#eab308' },
+      { label: 'Primary Services',           amount:  1.3, color: '#22c55e' },
+      { label: 'Other',                      amount:  0.2, color: '#94a3b8' },
     ];
 
-    // Total Crown revenue for 2024/25: $169.8B (tax + non-tax)
-    // Tax revenue specifically: $121.1B
-    // We use tax revenue as the base so the spent amounts sum to the tax actually paid
-    const TOTAL_GOVT_REVENUE  = 169.8;  // billion — all revenue collected
-    const TOTAL_TAX_REVENUE  = 121.1;  // billion — tax revenue only
+    // Total Crown revenue for 2025/26 (BEFU forecast): tax $124.8B, total $137.2B
+    // Source: FI tables for FSG sheet, row 11 (Core Crown tax revenue) and row 12 (Core Crown revenue)
+    const TOTAL_GOVT_REVENUE  = 137.2;  // billion — all Core Crown revenue
+    const TOTAL_TAX_REVENUE  = 124.8;  // billion — Core Crown tax revenue only
 
     function fmt(n) {
       return '$' + n.toLocaleString('en-NZ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
