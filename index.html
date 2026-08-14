@@ -507,7 +507,7 @@
         <div class="deduction-row">
           <div class="deduction-group">
             <label for="ks-rate">KiwiSaver</label>
-            <input type="number" id="ks-rate" value="3" min="0" max="10" step="0.5">
+            <input type="number" id="ks-rate" value="3.5" min="0" max="10" step="0.5">
             <span class="unit">%</span>
           </div>
           <div class="deduction-group">
@@ -570,7 +570,9 @@
           <summary>Data sources</summary>
           <ul>
             <li><strong>Top-level spending &amp; debt</strong>: The Treasury — <em>Financial Statements of the Government of New Zealand, 11 months to 31 May 2026</em> (fsgnz-11mths-may26.xlsx), specifically the <em>FI Fun Class</em> sheet (Core Crown expenses) and <em>FI tables for FSG</em> sheet (Core Crown tax revenue, gross/net debt, finance costs).</li>
-            <li><strong>Tax brackets</strong>: 2025/26 NZ income tax rates (IRD).</li>
+            <li><strong>Tax brackets</strong>: NZ income tax rates effective 1 April 2025, unchanged for the 2026/27 tax year (IRD) — 10.5% / 17.5% / 30% / 33% / 39%.</li>
+            <li><strong>ACC Earner's Levy</strong>: 1.75%, capped at $156,641 of liable earnings, effective 1 April 2026 (ACC / IRD).</li>
+            <li><strong>KiwiSaver default rate</strong>: 3.5%, the new default employee contribution rate from 1 April 2026 (previously 3%) — adjustable above.</li>
             <li><strong>Sub-category breakdown</strong>: 2024/25 Estimates of Appropriations — not refreshed for 2025/26. Treat as illustrative only.</li>
           </ul>
         </details>
@@ -579,13 +581,15 @@
   </div>
 
   <script>
-    // 2025/26 NZ tax brackets
+    // NZ income tax brackets, effective 1 April 2025 (2025/26 tax year) — unchanged for 2026/27 by Budget 2026.
+    // Source: IRD. Supersedes the mid-2024 transitional/blended thresholds and adds the 39% top rate
+    // (introduced 1 April 2021) that was previously missing from this calculator.
     const TAX_BRACKETS = [
-      { min: 0,       max: 14000,  rate: 0.105 },
-      { min: 14000,   max: 48000,  rate: 0.175 },
-      { min: 48000,   max: 70000,  rate: 0.205 },
-      { min: 70000,   max: 180000, rate: 0.30  },
-      { min: 180000,  max: Infinity, rate: 0.33 },
+      { min: 0,       max: 15600,  rate: 0.105 },
+      { min: 15600,   max: 53500,  rate: 0.175 },
+      { min: 53500,   max: 78100,  rate: 0.30  },
+      { min: 78100,   max: 180000, rate: 0.33  },
+      { min: 180000,  max: Infinity, rate: 0.39 },
     ];
 
     function calcPAYE(income) {
@@ -599,11 +603,13 @@
       return tax;
     }
 
+    // ACC Earner's Levy, 2026/27 (effective 1 April 2026): 1.75% of liable earnings, capped at $156,641.
+    // Source: ACC / IRD — Accident Compensation (Earners' Levy) Regulations 2025.
     function calcACC(income) {
-      return Math.min(income, 141900) * 0.0166 + income * 0.0020;
+      return Math.min(income, 156641) * 0.0175;
     }
 
-    function calcKS(income) { return income * 0.03; }
+    function calcKS(income) { return income * 0.035; }
 
     // Sub-category data keyed by spending category label
     // Each sub: { label, amount_bn, color }
@@ -711,7 +717,7 @@
     let gIncome  = 0;
     let gPaye    = 0;
     let gRatio   = 0;
-    let gKsRate  = 0.03;
+    let gKsRate  = 3.5;
     let gOtherRate = 0;
 
     function toggleRow(label) {
@@ -813,7 +819,7 @@
           <span class="value">${fmt(Math.round(gPaye))}</span>
         </div>
         <div class="income-item">
-          <span class="label">ACC levies (~1.86%)</span>
+          <span class="label">ACC Earner's Levy (1.75%)</span>
           <span class="value">${fmt(Math.round(acc))}</span>
         </div>
         <div class="income-item">
